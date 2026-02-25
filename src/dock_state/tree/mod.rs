@@ -482,7 +482,6 @@ impl<Tab> Tree<Tab> {
     ) -> [NodeIndex; 2] {
         let old = self[parent].split(split, fraction);
         assert!(old.is_leaf() || old.is_parent());
-        assert_ne!(new.tabs_count(), 0);
         // Resize vector to fit the new size of the binary tree.
         {
             let index = self.nodes.iter().rposition(|n| !n.is_empty()).unwrap_or(0);
@@ -553,6 +552,19 @@ impl<Tab> Tree<Tab> {
             .ok_or(Error::InvalidNode)?
             .get_leaf_mut()
             .ok_or(Error::NonLeafNode)
+    }
+
+    /// Like [`Self::split`] but places an empty leaf node in the new position.
+    ///
+    /// Useful for layout builders that create the tree structure first and
+    /// fill tabs later via `append_tab`.
+    pub fn split_empty(
+        &mut self,
+        parent: NodeIndex,
+        split: Split,
+        fraction: f32,
+    ) -> [NodeIndex; 2] {
+        self.split(parent, split, fraction, Node::leaf_with(vec![]))
     }
 
     fn first_leaf(&self, top: NodeIndex) -> Option<NodeIndex> {
